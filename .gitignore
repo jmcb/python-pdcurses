@@ -1,0 +1,10 @@
+*.pyc
+*.pyd
+*.so
+*.o
+*.pyo
+*.pye
+*~
+*.swp
+*.swo
+*.swd
