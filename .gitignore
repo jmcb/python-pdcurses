@@ -11,3 +11,5 @@
 *.def
 *.dll
 *.lib
+pdcurses
+pdcurses-win32a
