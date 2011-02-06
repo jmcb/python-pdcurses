@@ -24,11 +24,13 @@ MANIFEST=MANIFEST.in
 
 all: gen pdcurses-setup.py pdcurses-win32a-setup.py
 
+dirs: $(PDCURSESW32_DIR) $(PDCURSES_DIR)
+
 $(PDCURSESW32_DIR):
 	$(MKDIR) $(PDCURSEW32_DIR)
 
-$(PDCURSESW_DIR):
-	$(MKDIR) $(PDCURSEW_DIR)
+$(PDCURSES_DIR):
+	$(MKDIR) $(PDCURSE_DIR)
 
 $(PDCURSESDEF):
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
@@ -48,11 +50,19 @@ pdcurses-setup.py: $(PDCURSES_DIR)
 pdcurses-win32a-setup.py: $(PDCURSESW32_DIR)
 	$(SED) -e s/PDCURSES_FLAV/-win32a/ $(SETUP_TEMPLATE) > $(PDCURSESW32_DIR)/setup.py
 
+setups: pdcurses-setup.py pdcurses-win32a-setup.py
+
 defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
 
 libs: $(PDCURSESLIB) $(PDCURSESW32LIB)
 
 gen: defs libs
+
+gen-pd-only: $(PDCURSESLIB) $(PDCURSESDEF)
+
+gen-w32-only: $(PDCURSESW32LIB) $(PDCURSESW32LIB)
+
+gen-source:
 	$(CP) *.h *.c $(MANIFEST) $(PDCURSESW32_DIR)
 	$(CP) *.h *.c $(MANIFEST) $(PDCURSES_DIR)
 
@@ -60,6 +70,16 @@ gen-save: defs libs
 	$(CP) $(PDCURSESDEF) $(PDCURSESLIB) $(GEN_DIR)
 	$(CP) $(PDCURSESW32DEF) $(GEN_DIR)/pdcurses-win32.def
 	$(CP) $(PDCURSESW32LIB) $(GEN_DIR)/pdcurses-win32.lib
+
+use-gen: use-gen-pd-only use-gen-w32-only
+
+use-gen-pd-only:
+	$(CP) $(GEN_DIR)/pdcurses.def $(PDCURSES_DIR)
+	$(CP) $(GEN_DIR)/pdcurses.lib $(PDCURSES_DIR)
+
+use-gen-w32-only:
+	$(CP) $(GEN_DIR)/pdcurses-win32a.def $(PDCURSESW32_DIR)
+	$(CP) $(GEN_DIR)/pdcurses-win32a.lib $(PDCURSESW32_DIR)
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
