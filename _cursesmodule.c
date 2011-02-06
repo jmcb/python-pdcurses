@@ -113,13 +113,9 @@ char *PyCursesVersion = "2.2";
 #define CURSES_MODULE
 #include "py_curses.h"
 
-#ifndef PyCurses_CAPSULE_NAME
-#define PyCurses_CAPSULE_NAME "_curses._C_API"
-#endif
+#include "term.h"
 
-#include <term.h>
-
-#include <curspriv.h>
+#include "curspriv.h"
 
 #define _ISPAD _PAD
 
@@ -2776,9 +2772,15 @@ init_curses(void)
     ModDict = d; /* For PyCurses_InitScr to use later */
 
     /* Add a capsule for the C API */
+#ifndef PyCurses_CAPSULE_NAME
+    c_api_object = PyCObject_FromVoidPtr((void *)PyCurses_API, NULL);
+    PyDict_SetItemString(d, "_C_API", c_api_object);
+    Py_DECREF(c_api_object);
+#else
     c_api_object = PyCapsule_New(PyCurses_API, PyCurses_CAPSULE_NAME, NULL);
     PyDict_SetItemString(d, "_C_API", c_api_object);
     Py_DECREF(c_api_object);
+#endif
 
     /* For exception curses.error */
     PyCursesError = PyErr_NewException("_curses.error", NULL, NULL);
