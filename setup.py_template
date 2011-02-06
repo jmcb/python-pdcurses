@@ -36,6 +36,7 @@ def main ():
                           define_macros = [("WINDOW_HAS_FLAGS", None)],
                           libraries = ["pdcurses"])],
         data_files = [(".", ["pdcurses.dll"])],
+        include_dirs = ['./'],
         )
 
 if __name__=="__main__":
