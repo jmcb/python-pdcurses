@@ -1,4 +1,7 @@
 PEXPORTS=pexports
+ifeq ($(shell which $(PEXPORTS) > /dev/null 2> /dev/null && echo Yes),)
+PEXPORTS_AVAILABLE=Yes
+endif
 PDCURSES_DIR=pdcurses
 PDCURSESW32_DIR=pdcurses-win32a
 PDCURSESDLL=$(PDCURSES_DIR)/pdcurses.dll
@@ -35,14 +38,18 @@ $(PDCURSESW32_DIR):
 $(PDCURSES_DIR):
 	$(MKDIR) $(PDCURSE_DIR)
 
-$(PDCURSESDEF):
+$(PDCURSESDEF): use-gen-pd-only
+ifdef PEXPORTS_AVAILABLE
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
+endif
 
 $(PDCURSESLIB): $(PDCURSESDEF)
 	$(DLLTOOL) --dllname $(PDCURSESDLL) --def $(PDCURSESDEF) --output-lib $(PDCURSESLIB)
 
-$(PDCURSESW32DEF):
+$(PDCURSESW32DEF): use-gen-w32-only
+ifdef PEXPORTS_AVAILABLE
 	$(PEXPORTS) $(PDCURSESW32DLL) | $(SED) -e "s/^_//g" > $(PDCURSESW32DEF)
+endif
 
 $(PDCURSESW32LIB): $(PDCURSESW32DEF)
 	$(DLLTOOL) --dllname $(PDCURSESW32DLL) --def $(PDCURSESW32DEF) --output-lib $(PDCURSESW32LIB)
@@ -75,8 +82,8 @@ gen-source-pd-only:
 
 gen-save: defs libs
 	$(CP) $(PDCURSESDEF) $(PDCURSESLIB) $(GEN_DIR)
-	$(CP) $(PDCURSESW32DEF) $(GEN_DIR)/pdcurses-win32.def
-	$(CP) $(PDCURSESW32LIB) $(GEN_DIR)/pdcurses-win32.lib
+	$(CP) $(PDCURSESW32DEF) $(GEN_DIR)/pdcurses-win32a.def
+	$(CP) $(PDCURSESW32LIB) $(GEN_DIR)/pdcurses-win32a.lib
 
 use-gen: use-gen-pd-only use-gen-w32-only
 
