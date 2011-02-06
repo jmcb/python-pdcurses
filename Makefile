@@ -22,7 +22,7 @@ PDCURSESW32_DIST=$(PDCURSESW32_DIR)/dist
 SETUP_TEMPLATE=setup.py_template
 MANIFEST=MANIFEST.in
 
-all: gen pdcurses-setup.py pdcurses-win32a-setup.py
+all: dirs gen setups gen-source
 
 dirs: $(PDCURSESW32_DIR) $(PDCURSES_DIR)
 
