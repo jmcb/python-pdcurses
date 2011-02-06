@@ -139,6 +139,11 @@ typedef chtype attr_t;           /* No attr_t type is available */
         PyObject_HEAD_INIT(type) size,
 #endif
 
+/* To quiet a compiler warning about an unused ERR variable: */
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
+
 /* Definition of exception curses.error */
 
 static PyObject *PyCursesError;
@@ -2068,6 +2073,8 @@ PyCurses_setupterm(PyObject* self, PyObject *args, PyObject* keywds)
         PyErr_SetString(PyCursesError,s);
         return NULL;
     }
+#else
+    UNUSED(err);
 #endif
 
     initialised_setupterm = TRUE;
