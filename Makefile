@@ -10,6 +10,7 @@ DLLTOOL=dlltool
 RM=rm
 CP=cp
 GEN_DIR=gen
+BUILD=build
 
 pdcurses.def:
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
@@ -26,6 +27,7 @@ pdcurses-win32a.lib:
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
 	$(RM) -f $(PDCURSESW32DEF) $(PDCURSESW32LIB)
+	$(RM) -rf $(BUILD)
 
 gen: pdcurses.def pdcurses.lib pdcurses-win32a.def pdcurses-win32a.lib
 	$(CP) $(PDCURSESDEF) $(GEN_DIR)
