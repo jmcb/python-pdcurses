@@ -2771,12 +2771,13 @@ init_curses(void)
         return;
     ModDict = d; /* For PyCurses_InitScr to use later */
 
-    /* Add a capsule for the C API */
 #ifndef PyCurses_CAPSULE_NAME
+    /* Expose the C API. */
     c_api_object = PyCObject_FromVoidPtr((void *)PyCurses_API, NULL);
     PyDict_SetItemString(d, "_C_API", c_api_object);
     Py_DECREF(c_api_object);
 #else
+    /* If Capsules are available, use them. */
     c_api_object = PyCapsule_New(PyCurses_API, PyCurses_CAPSULE_NAME, NULL);
     PyDict_SetItemString(d, "_C_API", c_api_object);
     Py_DECREF(c_api_object);
