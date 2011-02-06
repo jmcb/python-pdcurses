@@ -92,8 +92,8 @@ use-gen-pd-only:
 	$(CP) $(GEN_DIR)/pdcurses.lib $(PDCURSES_DIR)
 
 use-gen-w32-only:
-	$(CP) $(GEN_DIR)/pdcurses-win32a.def $(PDCURSESW32_DIR)
-	$(CP) $(GEN_DIR)/pdcurses-win32a.lib $(PDCURSESW32_DIR)
+	$(CP) $(GEN_DIR)/pdcurses-win32a.def $(PDCURSESW32_DIR)/pdcurses.def
+	$(CP) $(GEN_DIR)/pdcurses-win32a.lib $(PDCURSESW32_DIR)/pdcurses.lib
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
