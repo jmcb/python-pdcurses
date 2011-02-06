@@ -11,38 +11,48 @@ SED=sed
 DLLTOOL=dlltool
 RM=rm
 CP=cp
+MKDIR=mkdir
 GEN_DIR=gen
 BUILD=build
 PDCURSES_BUILD=$(PDCURSES_DIR)/build
 PDCURSESW32_BUILD=$(PDCURSESW32_DIR)/build
 SETUP_TEMPLATE=setup.py_template
 
-pdcurses.def:
+$(PDCURSESW32_DIR):
+	$(MKDIR) $(PDCURSEW32_DIR)
+
+$(PDCURSESW_DIR):
+	$(MKDIR) $(PDCURSEW_DIR)
+
+$(PDCURSESDEF):
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
 
-pdcurses.lib: pdcurses.def
+$(PDCURSESLIB): $(PDCURSESDEF)
 	$(DLLTOOL) --dllname $(PDCURSESDLL) --def $(PDCURSESDEF) --output-lib $(PDCURSESLIB)
 
-pdcurses-win32a.def:
-	$(PEXPORTS) $(PDCURSESW32DLL) | $(SED) -e "s/^_//g" > $(PDCURSESW32DEF)
+$(PDCURSES32DEF):
+	$(PEXPORTS) $(PDCURSES32DLL) | $(SED) -e "s/^_//g" > $(PDCURSES32DEF)
 
-pdcurses-win32a.lib:
-	$(DLLTOOL) --dllname $(PDCURSESW32DLL) --def $(PDCURSESW32DEF) --output-lib $(PDCURSESW32LIB)
+$(PDCURSES32LIB): $(PDCURSES32DEF)
+	$(DLLTOOL) --dllname $(PDCURSES32DLL) --def $(PDCURSES32DEF) --output-lib $(PDCURSES32LIB)
 
 pdcurses-setup.py:
 	$(CP) $(SETUP_TEMPLATE) $(PDCURSES_DIR)/setup.py
+	$(SED) -i -e s/PDCURSES_FLAV// $(PDCURSES_DIR)/setup.py
 
 pdcurses-win32a-setup.py:
 	$(CP) $(SETUP_TEMPLATE) $(PDCURSESW32_DIR)/setup.py
+	$(SED) -i -e s/PDCURSES_FLAV/_WIN32A/ $(PDCURSESW32_DIR)/setup.py
+
+defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
+
+libs: $(PDCURSESLIB) $(PDCURSESW32LIB)
+
+gen: defs libs
+
+all: gen pdcurses-setup.py pdcurses-win32a-setup.py
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
 	$(RM) -f $(PDCURSESW32DEF) $(PDCURSESW32LIB)
 	$(RM) -rf $(BUILD) $(PDCURSES_BUILD) $(PDCURSESW32_BUILD)
-
-gen: pdcurses.def pdcurses.lib pdcurses-win32a.def pdcurses-win32a.lib
-	$(CP) $(PDCURSESDEF) $(GEN_DIR)
-	$(CP) $(PDCURSESLIB) $(GEN_DIR)
-	$(CP) $(PDCURSESW32DEF) $(GEN_DIR)
-	$(CP) $(PDCURSESW32LIB) $(GEN_DIR)
-

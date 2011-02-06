@@ -7,7 +7,7 @@ from distutils.core import setup, Extension
 import os
 
 setup (
-    name = "pdcurses",
+    name = "pdcursesPDCURSES_FLAV",
     version = "0.3.4",
     description = "PDCurses drop-in replacement for _curses.",
     author = "Jon McManus, PDCurses",
