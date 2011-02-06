@@ -65,8 +65,8 @@ free to open an issue on the `python-pdcurses Issue tracker`_.
 
 For installation, please see the `Installation`_ section of this document.
 
-Installation
-============
+From-source installation
+========================
 
 There are two specific flavours of python-pdcurses that can be installed. These
 are divided into "pdcurses" and "pdcurses-win32a". Please see the relevant
@@ -75,6 +75,13 @@ installation.
 
 Currently, only building on Windows is supported. Hopefully this section can be
 easily extended to cover building on other platforms.
+
+If you are installing from a clone of the git repository, follow the
+instructions under ``From git``. Otherwise, follow the instructions under
+``From source``.
+
+From git
+^^^^^^^^
 
 pdcurses
 --------
@@ -129,38 +136,9 @@ pdcurses.dll file in the relevant directories.
 Now run::
 
     make all
-
-This should give you the following directory structure::
-
-    pdcurses/
-        pdcurses.dll
-        pdcurses.def
-        pdcurses.lib
-        setup.py
-        MANIFEST.in
-        term.h
-        panel.h
-        curspriv.h
-        curses.h
-        _cursesmodule.c
-        _curses_panel.c
-    pdcurses-win32a/
-        pdcurses.dll
-        pdcurses.def
-        pdcurses.lib
-        setup.py
-        MANIFEST.in
-        term.h
-        panel.h
-        curspriv.h
-        curses.h
-        _cursesmodule.c
-        _curses_panel.c
-
-If you are only planning on making one of the two targets, instead run::
-
+    OR (for plain pdcurses only)
     make all-pd-only
-    OR
+    OR (for win32a pdcurses only)
     make all-w32-only
 
 Manual
@@ -209,14 +187,61 @@ bdist_wininst, etc, without prior compilation attempts to compile using the
 system default (likely Microsoft Visual C++, which you may not have installed),
 ignoring the -c parameter.*
 
+Alternate
++++++++++
+
+To provide support for ``pip``'s easy installation system, there is a rather
+hacked-together ``setup.py`` in the root directory which you can call instead of
+doing the above::
+
+    python setup.py build -c mingw32
+    python setup.py install
+    OR
+    python setup.py bdist_wininst
+
+This specifically only builds ``pdcurses``, not ``pdcurses-win32a``. If you wish
+to build the latter, either follow the complicated instructions above, or
+download a ``python-pdcurses-win32a`` source file and follow the instructions in
+the ``From source`` section.
+
+From source
+^^^^^^^^^^^
+
+There are two source distributions: ``python-pdcurses-0.3.4``, and
+``python-pdcurses-win32a-0.3.4``. Each provides the necessary source files
+(headers, actual source, .def, .lib and .dll) to compile the module.
+
+In all instances it should be as simple as unzipping and executing the following
+commands::
+
+    python setup.py build -c mingw32
+    python setup.py install
+    OR
+    python setup.py bdist_wininst
+
 License
 =======
 
 Please see LICENSE.rst.
 
+Links
+=====
 
-.. Links
-.. =====
+A summary of the links found in this document:
+
+1. The `PDCurses`_ project homepage.
+2. `Jérôme Berger`_'s website.
+3. `Issue 2889`_ on the Python issue tracker, relating to pdcurses.
+4. Jérôme Berger's `binary package`_ for Python 2.6.
+5. The `PDcurses-win32a`_ fork of PDCurses, doing new window creation and direct
+   drawing using the Windows API.
+6. The `PDCurses mailing list`_.
+7. The `python-pdcurses`_ project homepage (this project).
+8. The `python-pdcurses Issue tracker`_ (this project).
+9. Direct link to `pdcurses.dll`_ on the PDCurses's SourceForge project page.
+10. Direct link to `pdcurses.dll (win32a)`_ on the PDCurses win32a page.
+11. The `MinGW32`_ project.
+12. `boodebr.org's Tutorial`_ for compiling Python C extensions using MinGW32.
 
 .. _`PDCurses`: http://pdcurses.sourceforge.net
 

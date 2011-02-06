@@ -114,3 +114,4 @@ clean:
 	$(RM) -f $(PDCURSESW32_DIR)/$(MANIFEST) $(PDCURSESW32_DIR)/MANIFEST
 	$(RM) -f $(PDCURSES_DIR)/$(MANIFEST) $(PDCURSES_DIR)/MANIFEST
 	$(RM) -f $(PDCURSES_DIR)/setup.py $(PDCURSESW32_DIR)/setup.py
+	$(RM) -f pdcurses.def pdcurses.lib *.pyc
