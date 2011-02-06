@@ -1741,7 +1741,7 @@ PyCurses_color_pair(PyObject *self, PyObject *args)
     PyCursesInitialisedColor;
 
     if (!PyArg_ParseTuple(args, "i:color_pair", &n)) return NULL;
-    return PyInt_FromLong((long) (n << 8));
+    return PyInt_FromLong(COLOR_PAIR(n));
 }
 
 static PyObject *
