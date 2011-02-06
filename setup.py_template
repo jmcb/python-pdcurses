@@ -25,7 +25,7 @@ def monkey_cmp (self, other):
     if self.version > other.version:
         return 1
 
-if sys.hexversion <= 0x30001f0:
+if sys.hexversion <= 0x30001f0 and sys.hexversion >= 0x30000f0:
     distutils.version.LooseVersion._cmp = monkey_cmp
 
 def main ():
