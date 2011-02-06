@@ -56,11 +56,16 @@ gen: defs libs
 	$(CP) *.h *.c $(MANIFEST) $(PDCURSESW32_DIR)
 	$(CP) *.h *.c $(MANIFEST) $(PDCURSES_DIR)
 
+gen-save: defs libs
+	$(CP) $(PDCURSESDEF) $(PDCURSESLIB) $(GEN_DIR)
+	$(CP) $(PDCURSESW32DEF) $(GEN_DIR)/pdcurses-win32.def
+	$(CP) $(PDCURSESW32LIB) $(GEN_DIR)/pdcurses-win32.lib
+
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
 	$(RM) -f $(PDCURSESW32DEF) $(PDCURSESW32LIB)
 	$(RM) -rf $(BUILD) $(PDCURSES_BUILD) $(PDCURSESW32_BUILD)
 	$(RM) -rf $(DIST) $(PDCURSES_DIST) $(PDCURSESW32_DIST)
 	$(RM) -rf $(PDCURSESW32_DIR)/*.h $(PDCURSESW32_DIR)/*.c
-	$(RM) -rf $(PDCURSESW_DIR)/*.h $(PDCURSESW_DIR)/*.c
+	$(RM) -rf $(PDCURSES_DIR)/*.h $(PDCURSES_DIR)/*.c
 
