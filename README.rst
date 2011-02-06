@@ -87,4 +87,4 @@ Installation
 
 .. _`python-pdcurses`: http://www.github.com/jmcb/python-pdcurses
 
-.. _`python-pducrses Issue tracker`: http://www.github.com/jmcb/python-pdcurses/issues
+.. _`python-pdcurses Issue tracker`: http://www.github.com/jmcb/python-pdcurses/issues
