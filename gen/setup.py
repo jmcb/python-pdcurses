@@ -4,7 +4,11 @@ python-pdcurses setup module.
 """
 
 from distutils.core import setup, Extension
-import os
+import os, sys
+
+extra_link = []
+extra_comp = []
+extra_libs = []
 
 def main ():
     setup (
@@ -34,9 +38,9 @@ def main ():
         ext_modules = [Extension ('_curses',
                           sources = ['_curses_panel.c', '_cursesmodule.c'],
                           define_macros = [("WINDOW_HAS_FLAGS", None)],
-                          extra_compile_args = ['-L./'],
-                          extra_link_args = ['-L./'],
-                          libraries = ["pdcurses"])],
+                          extra_compile_args = ['-L./'] + extra_comp,
+                          extra_link_args = ['-L./'] + extra_link,
+                          libraries = ["pdcurses"] + extra_libs)],
         data_files = [(".", ["pdcurses.dll"])],
         include_dirs = ['./'],
         )
