@@ -1,5 +1,5 @@
 PEXPORTS=pexports
-ifeq ($(shell which $(PEXPORTS) > /dev/null 2> /dev/null && echo Yes),)
+ifeq ($(shell which $(PEXPORTS) > /dev/null 2> /dev/null && echo yes),yes)
 PEXPORTS_AVAILABLE=Yes
 endif
 PDCURSES_DIR=pdcurses
@@ -24,6 +24,7 @@ PDCURSES_DIST=$(PDCURSES_DIR)/dist
 PDCURSESW32_DIST=$(PDCURSESW32_DIR)/dist
 SETUP_TEMPLATE=setup.py_template
 MANIFEST=MANIFEST.in
+MAKE=make
 
 all: dirs gen setups gen-source
 
@@ -38,17 +39,21 @@ $(PDCURSESW32_DIR):
 $(PDCURSES_DIR):
 	$(MKDIR) $(PDCURSE_DIR)
 
-$(PDCURSESDEF): use-gen-pd-only
+$(PDCURSESDEF):
 ifdef PEXPORTS_AVAILABLE
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
+else
+	$(MAKE) use-gen-pd-only
 endif
 
 $(PDCURSESLIB): $(PDCURSESDEF)
 	$(DLLTOOL) --dllname $(PDCURSESDLL) --def $(PDCURSESDEF) --output-lib $(PDCURSESLIB)
 
-$(PDCURSESW32DEF): use-gen-w32-only
+$(PDCURSESW32DEF):
 ifdef PEXPORTS_AVAILABLE
 	$(PEXPORTS) $(PDCURSESW32DLL) | $(SED) -e "s/^_//g" > $(PDCURSESW32DEF)
+else
+	$(MAKE) use-gen-w32-only
 endif
 
 $(PDCURSESW32LIB): $(PDCURSESW32DEF)
