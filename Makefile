@@ -15,6 +15,7 @@ GEN_DIR=gen
 BUILD=build
 PDCURSES_BUILD=$(PDCURSES_DIR)/build
 PDCURSESW32_BUILD=$(PDCURSESW32_DIR)/build
+SETUP_TEMPLATE=setup.py_template
 
 pdcurses.def:
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
@@ -27,6 +28,12 @@ pdcurses-win32a.def:
 
 pdcurses-win32a.lib:
 	$(DLLTOOL) --dllname $(PDCURSESW32DLL) --def $(PDCURSESW32DEF) --output-lib $(PDCURSESW32LIB)
+
+pdcurses-setup.py:
+	$(CP) $(SETUP_TEMPLATE) $(PDCURSES_DIR)/setup.py
+
+pdcurses-win32a-setup.py:
+	$(CP) $(SETUP_TEMPLATE) $(PDCURSESW32_DIR)/setup.py
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
