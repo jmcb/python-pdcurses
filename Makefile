@@ -36,13 +36,11 @@ $(PDCURSESW32DEF):
 $(PDCURSESW32LIB): $(PDCURSESW32DEF)
 	$(DLLTOOL) --dllname $(PDCURSESW32DLL) --def $(PDCURSESW32DEF) --output-lib $(PDCURSESW32LIB)
 
-pdcurses-setup.py:
-	$(CP) $(SETUP_TEMPLATE) $(PDCURSES_DIR)/setup.py
-	$(SED) -i -e s/PDCURSES_FLAV// $(PDCURSES_DIR)/setup.py
+pdcurses-setup.py: $(PDCURSES_DIR)
+	$(SED) -e s/PDCURSES_FLAV// $(SETUP_TEMPLATE) > $(PDCURSES_DIR)/setup.py
 
-pdcurses-win32a-setup.py:
-	$(CP) $(SETUP_TEMPLATE) $(PDCURSESW32_DIR)/setup.py
-	$(SED) -i -e s/PDCURSES_FLAV/_WIN32A/ $(PDCURSESW32_DIR)/setup.py
+pdcurses-win32a-setup.py: $(PDCURSESW32_DIR)
+	$(SED) -e s/PDCURSES_FLAV/-win32a/ $(SETUP_TEMPLATE) > $(PDCURSESW32_DIR)/setup.py
 
 defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
 
