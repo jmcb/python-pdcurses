@@ -16,7 +16,12 @@ GEN_DIR=gen
 BUILD=build
 PDCURSES_BUILD=$(PDCURSES_DIR)/build
 PDCURSESW32_BUILD=$(PDCURSESW32_DIR)/build
+DIST=dist
+PDCURSES_DIST=$(PDCURSES_DIR)/dist
+PDCURSESW32_DIST=$(PDCURSESW32_DIR)/dist
 SETUP_TEMPLATE=setup.py_template
+
+all: gen pdcurses-setup.py pdcurses-win32a-setup.py
 
 $(PDCURSESW32_DIR):
 	$(MKDIR) $(PDCURSEW32_DIR)
@@ -47,10 +52,14 @@ defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
 libs: $(PDCURSESLIB) $(PDCURSESW32LIB)
 
 gen: defs libs
-
-all: gen pdcurses-setup.py pdcurses-win32a-setup.py
+	$(CP) *.h *.c $(PDCURSESW32_DIR)
+	$(CP) *.h *.c $(PDCURSES_DIR)
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
 	$(RM) -f $(PDCURSESW32DEF) $(PDCURSESW32LIB)
 	$(RM) -rf $(BUILD) $(PDCURSES_BUILD) $(PDCURSESW32_BUILD)
+	$(RM) -rf $(DIST) $(PDCURSES_DIST) $(PDCURSESW32_DIST)
+	$(RM) -rf $(PDCURSESW32_DIR)/*.h $(PDCURSESW32_DIR)/*.c
+	$(RM) -rf $(PDCURSESW_DIR)/*.h $(PDCURSESW_DIR)/*.c
+
