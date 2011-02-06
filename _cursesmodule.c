@@ -113,6 +113,10 @@ char *PyCursesVersion = "2.2";
 #define CURSES_MODULE
 #include "py_curses.h"
 
+#ifndef PyCurses_CAPSULE_NAME
+#define PyCurses_CAPSULE_NAME "_curses._C_API"
+#endif
+
 #include <term.h>
 
 #include <curspriv.h>
