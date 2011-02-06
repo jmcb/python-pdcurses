@@ -1,0 +1,10 @@
+include pdcurses.dll
+include pdcurses.def
+include pdcurses.lib
+include MANIFEST.in
+include term.h
+include curspriv.h
+include curses.h
+include panel.h
+include _cursesmodule.c
+include _curses_panel.c
