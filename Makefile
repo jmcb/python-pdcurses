@@ -20,6 +20,7 @@ DIST=dist
 PDCURSES_DIST=$(PDCURSES_DIR)/dist
 PDCURSESW32_DIST=$(PDCURSESW32_DIR)/dist
 SETUP_TEMPLATE=setup.py_template
+MANIFEST=MANIFEST.in
 
 all: gen pdcurses-setup.py pdcurses-win32a-setup.py
 
@@ -52,8 +53,8 @@ defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
 libs: $(PDCURSESLIB) $(PDCURSESW32LIB)
 
 gen: defs libs
-	$(CP) *.h *.c $(PDCURSESW32_DIR)
-	$(CP) *.h *.c $(PDCURSES_DIR)
+	$(CP) *.h *.c $(MANIFEST) $(PDCURSESW32_DIR)
+	$(CP) *.h *.c $(MANIFEST) $(PDCURSES_DIR)
 
 clean:
 	$(RM) -f $(PDCURSESDEF) $(PDCURSESLIB)
