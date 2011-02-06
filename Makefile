@@ -1,18 +1,20 @@
 PEXPORTS=pexports
-PDCURSESDLL=pdcurses.dll
-PDCURSESDEF=pdcurses.def
-PDCURSESLIB=pdcurses.lib
-PDCURSESW32DLL=pdcurses-win32a.dll
-PDCURSESW32DEF=pdcurses-win32a.def
-PDCURSESW32LIB=pdcurses-win32a.lib
+PDCURSES_DIR=pdcurses
+PDCURSESW32_DIR=pdcurses-win32a
+PDCURSESDLL=$(PDCURSES_DIR)/pdcurses.dll
+PDCURSESDEF=$(PDCURSES_DIR)/pdcurses.def
+PDCURSESLIB=$(PDCURSES_DIR)/pdcurses.lib
+PDCURSESW32DLL=$(PDCURSESW32_DIR)/pdcurses.dll
+PDCURSESW32DEF=$(PDCURSESW32_DIR)/pdcurses.def
+PDCURSESW32LIB=$(PDCURSESW32_DIR)/pdcurses.lib
 SED=sed
 DLLTOOL=dlltool
 RM=rm
 CP=cp
 GEN_DIR=gen
 BUILD=build
-PDCURSES_BUILD=pdcurses/build
-PDCURSESW32_BUILD=pdcurses-win32a/build
+PDCURSES_BUILD=$(PDCURSES_DIR)/build
+PDCURSESW32_BUILD=$(PDCURSESW32_DIR)/build
 
 pdcurses.def:
 	$(PEXPORTS) $(PDCURSESDLL) | $(SED) -e "s/^_//g" > $(PDCURSESDEF)
