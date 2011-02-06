@@ -3,12 +3,30 @@
 python-pdcursesPDCURSES_FLAV setup module.
 """
 
+import distutils.version
 from distutils.core import setup, Extension
 import os, sys
 
 extra_link = []
 extra_comp = []
 extra_libs = []
+
+def monkey_cmp (self, other):
+    """
+    Monkey patch to resolve issue with 3.0 distutils.
+    """
+    if isinstance(other, str):
+        other = distutils.version.LooseVersion(other)
+
+    if self.version == other.version:
+        return 0
+    if self.version < other.version:
+        return -1
+    if self.version > other.version:
+        return 1
+
+if sys.hexversion <= 0x30001f0:
+    distutils.version.LooseVersion._cmp = monkey_cmp
 
 def main ():
     setup (
