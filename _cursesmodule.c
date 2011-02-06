@@ -2055,6 +2055,7 @@ PyCurses_setupterm(PyObject* self, PyObject *args, PyObject* keywds)
         }
     }
 
+#ifndef _WIN32
     if (setupterm(termstr,fd,&err) == ERR) {
         char* s = "setupterm: unknown error";
 
@@ -2067,6 +2068,7 @@ PyCurses_setupterm(PyObject* self, PyObject *args, PyObject* keywds)
         PyErr_SetString(PyCursesError,s);
         return NULL;
     }
+#endif
 
     initialised_setupterm = TRUE;
 
