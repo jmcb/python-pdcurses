@@ -118,6 +118,11 @@ In my experience, it is necessary to do compilation directly via Window's
 ``cmd.exe`` prompt, over any instance of msysgit, git bash, Cygwin, etc; these
 latter provide a variety of libraries that can cause clashes with MinGW32.
 
+**Note: If compiling against Python 2.3 or earlier, you will need the relevant
+libpythonXX.a file copied into your PythonXX\libs directory. For convenience,
+libpython23.a is included in the gen folder (gen/libpython23.a). For other
+versions, you'll need to follow the instructions found on the `MinGW32 Wiki`_.**
+
 However, using one of these suites with access to ``make``, ``sed`` and a
 variety of other programs will make the experience a lot easier.
 
@@ -266,3 +271,5 @@ A summary of the links found in this document:
 .. _`MinGW32`: http://www.mingw.org/
 
 .. _`boodebr.org's Tutorial`: http://boodebr.org/main/python/build-windows-extensions
+
+.. _`MinGW32 wiki`: http://oldwiki.mingw.org/index.php/Python%20extensions
