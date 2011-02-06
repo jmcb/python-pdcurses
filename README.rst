@@ -180,7 +180,7 @@ If you wish to create a binary package, you can instead use::
 This will create an installer that will register itself as a program on Windows
 platforms, and can thus be removed with ease at a later date.
 
-*Note: Unless you copy the file distutils.cfg into your Python directory
+*Note: Unless you copy the file gen/distutils.cfg into your Python directory
 (specifically X:\PythonXX\Libs\distutils\), you need to call build first to
 ensure that it uses the correct compiler. Otherwise attempting to call install,
 bdist_wininst, etc, without prior compilation attempts to compile using the
