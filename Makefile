@@ -60,6 +60,10 @@ pdcurses-setup.py: $(PDCURSES_DIR)
 pdcurses-win32a-setup.py: $(PDCURSESW32_DIR)
 	$(SED) -e s/PDCURSES_FLAV/-win32a/ $(SETUP_TEMPLATE) > $(PDCURSESW32_DIR)/setup.py
 
+gen-setups.py: pdcurses-setup.py pdcurses-win32a-setup.py
+	$(CP) $(PDCURSESW32_DIR)/setup.py $(GEN_DIR)/setup-win32a.py
+	$(CP) $(PDCURSES_DIR)/setup.py $(GEN_DIR)/setup.py
+
 setups: pdcurses-setup.py pdcurses-win32a-setup.py
 
 defs: $(PDCURSESDEF) $(PDCURSESW32DEF)
