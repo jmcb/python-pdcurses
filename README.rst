@@ -68,7 +68,152 @@ For installation, please see the `Installation`_ section of this document.
 Installation
 ============
 
-(More to come.)
+There are two specific flavours of python-pdcurses that can be installed. These
+are divided into "pdcurses" and "pdcurses-win32a". Please see the relevant
+subheading for specific instructions, or the Common subheading for common
+installation.
+
+Currently, only building on Windows is supported. Hopefully this section can be
+easily extended to cover building on other platforms.
+
+pdcurses
+--------
+
+To build the original pdcurses flavour, you'll need a copy of pdcurses.dll. You
+can get this from the `PDCurses`_ website (or directly: `pdcurses.dll`_; the
+hash for this file on my system is ``8df023b6765b21cdf937a25d9d8f14e2.``).
+
+pdcurses-win32a
+---------------
+
+To build the win32a version, you'll need a copy of pdcurses.dll -- the specific
+drop-in replacement for the original pdcurses.dll file. You can find this on the
+`PDCurses-win32a`_ website (or directly: `pdcurses.dll (win32a)`_; the hash for
+this file on my system is ``a4bda187a318154bf943672a5cb7a5dd``).
+
+Common
+------
+
+On Windows, the simplest build environment to set up is one involving the
+`MinGW32`_ compiler. As there are a variety of good instructions for setting
+this up, I recommend reading `boodebr.org's Tutorial`_ and following the
+instructions there.
+
+Once you have MinGW32 installed, ensure that it's binary directory is included
+in your PATH variable (On Windows, this can be found by right-clicking on ``My
+Computer`` -> ``Properties`` -> ``Advanced`` -> ``Environment Variables`` and
+adding the path to your installation; for default installations this may be
+``C:\MingW32\bin``); also ensure that your Python installation is found in the
+same variable (for default installations of Python, this is likely
+``C:\PythonXX\``).
+
+In my experience, it is necessary to do compilation directly via Window's
+``cmd.exe`` prompt, over any instance of msysgit, git bash, Cygwin, etc; these
+latter provide a variety of libraries that can cause clashes with MinGW32.
+
+However, using one of these suites with access to ``make``, ``sed`` and a
+variety of other programs will make the experience a lot easier.
+
+Automatic
++++++++++
+
+Inside your shell (with access to ``make``, etc)::
+    
+    make dirs
+
+This should generate two subfolders: ``pdcurses`` and ``pdcurses-win32a``. If
+you are only building a specific target, place the relevant pdcurses.dll file in
+that target directory. If you are building both targets, place the relevant
+pdcurses.dll file in the relevant directories.
+
+Now run::
+
+    make all
+
+This should give you the following directory structure::
+
+    pdcurses/
+        pdcurses.dll
+        pdcurses.def
+        pdcurses.lib
+        setup.py
+        MANIFEST.in
+        term.h
+        panel.h
+        curspriv.h
+        curses.h
+        _cursesmodule.c
+        _curses_panel.c
+    pdcurses-win32a/
+        pdcurses.dll
+        pdcurses.def
+        pdcurses.lib
+        setup.py
+        MANIFEST.in
+        term.h
+        panel.h
+        curspriv.h
+        curses.h
+        _cursesmodule.c
+        _curses_panel.c
+
+If you are only planning on making one of the two targets, instead run::
+
+    make all-pd-only
+    OR
+    make all-w32-only
+
+Manual
+++++++
+
+You can duplicate the above effects if you do not have a system with ``make``,
+etc, by creating the directories ``pdcurses`` and ``pdcurses-win32a`` yourself.
+You'll need to copy and rename the following files::
+
+    gen/setup-win32a.py      -> pdcurses-win32a/setup.py
+    gen/pdcurses-win32a.def  -> pdcurses-win32a/pdcurses.def
+    gen/pdcurses-win32a.lib  -> pdcurses-win32a/pdcurses.lib
+    MANIFEST.in              -> pdcurses-win32a/MANIFEST.in
+    *.h                      -> pdcurses-win32a/*.h
+    *.c                      -> pdcurses-win32a/*.c
+    gen/setup.py             -> pdcurses/setup.py
+    gen/pdcurses.def         -> pdcurses/pdcurses.def
+    gen/pdcurses.lib         -> pdcurses/pdcurses.lib
+    MANIFEST.in              -> pdcurses/MANIFEST.in
+    *.h                      -> pdcurses/*.h
+    *.c                      -> pdcurses/*.c
+
+Obviously, if you're only planning to build one target, you merely need to copy
+one set of files.
+
+All
++++
+
+Finally, choose your build target (for example, for just ``pdcurses``), move to
+the relevant directory using ``cmd.exe``, and then execute::
+
+    python setup.py build -c mingw32
+    python setup.py install
+
+If you wish to create a binary package, you can instead use::
+
+    python setup.py bdist_wininst
+
+This will create an installer that will register itself as a program on Windows
+platforms, and can thus be removed with ease at a later date.
+
+*Note: Unless you copy the file distutils.cfg into your Python directory
+(specifically X:\PythonXX\Libs\distutils\), you need to call build first to
+ensure that it uses the correct compiler. Otherwise attempting to call install,
+bdist_wininst, etc, without prior compilation attempts to compile using the
+system default (likely Microsoft Visual C++, which you may not have installed),
+ignoring the -c parameter.*
+
+License
+=======
+
+Please see LICENSE.rst.
+
 
 .. Links
 .. =====
@@ -88,3 +233,11 @@ Installation
 .. _`python-pdcurses`: http://www.github.com/jmcb/python-pdcurses
 
 .. _`python-pdcurses Issue tracker`: http://www.github.com/jmcb/python-pdcurses/issues
+
+.. _`pdcurses.dll`: http://sourceforge.net/projects/pdcurses/files/pdcurses/3.4/pdc34dllw.zip/download
+
+.. _`pdcurses.dll (win32a)`: http://www.gwi.net/~pluto/devel/pdcurses.dll
+
+.. _`MinGW32`: http://www.mingw.org/
+
+.. _`boodebr.org's Tutorial`: http://boodebr.org/main/python/build-windows-extensions
