@@ -20,6 +20,9 @@ Thus, the aim of this module is to provide a drop-in replacement for ``_curses``
 using the `PDCurses`_ library. This module should hopefully work for all Python
 versions from 2.3 through 2.7.
 
+If you're looking to install this module from a binary package, please
+see the `INSTALL.rst`_ file.
+
 Module information
 ==================
 
@@ -63,10 +66,11 @@ be found either in this file, or in other files in this project (see
 `python-pdcurses`_ on GitHub). If none of these answers your questions, feel
 free to open an issue on the `python-pdcurses Issue tracker`_.
 
-For installation, please see the `Installation`_ section of this document.
-
 From-source installation
 ========================
+
+**Note: If you wish to install from a binary package, please see the
+`INSTALL.rst`_ file.**
 
 There are two specific flavours of python-pdcurses that can be installed. These
 are divided into "pdcurses" and "pdcurses-win32a". Please see the relevant
@@ -247,6 +251,8 @@ A summary of the links found in this document:
 10. Direct link to `pdcurses.dll (win32a)`_ on the PDCurses win32a page.
 11. The `MinGW32`_ project.
 12. `boodebr.org's Tutorial`_ for compiling Python C extensions using MinGW32.
+13. `MinGW32 wiki` page on compiling Python extensions.
+14. `INSTALL.rst`_ (this project).
 
 .. _`PDCurses`: http://pdcurses.sourceforge.net
 
@@ -273,3 +279,5 @@ A summary of the links found in this document:
 .. _`boodebr.org's Tutorial`: http://boodebr.org/main/python/build-windows-extensions
 
 .. _`MinGW32 wiki`: http://oldwiki.mingw.org/index.php/Python%20extensions
+
+.. _`INSTALL.rst`: https://github.com/jmcb/python-pdcurses/blob/master/INSTALL.rst
