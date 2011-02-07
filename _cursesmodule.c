@@ -2025,6 +2025,113 @@ PyCurses_UngetMouse(PyObject *self, PyObject *args)
 }
 #endif
 
+#if PY_MAJOR_VERSION == 3
+static PyObject *
+    PyCurses_GetWin(PyCursesWindowObject *self, PyObject *stream)
+{
+    PyObject *data;
+    size_t datalen;
+    WINDOW *win;
+
+#ifdef _WIN32
+    TCHAR path[MAX_PATH];
+    DWORD retval;
+    retval = GetTempPath(MAX_PATH, path);
+    if (retval == 0 || retval > MAX_PATH)
+    {
+        PyErr_SetString(PyExc_IOError, "couldn't find the temporary file path");
+        return NULL;
+    }
+
+    TCHAR fn[MAX_PATH];
+    retval = GetTempFileName(path, TEXT("PY_curses"), 0, fn);
+    if (retval == 0)
+    {
+        PyErr_SetString(PyExc_IOError, "couldn't find temporary file name");
+        return NULL;
+    }
+
+    FILE *fp = _tfopen(fn, "wb+");
+#else
+    char fn[100];
+    int fd;
+    FILE *fp;
+
+    PyCursesInitialised
+
+    strcpy(fn, "/tmp/py.curses.getwin.XXXXXX");
+    fd = mkstemp(fn);
+    if (fd < 0)
+        return PyErr_SetFromErrnoWithFilename(PyExc_IOError, fn);
+    fp = fdopen(fd, "wb+");
+#endif
+    if (fp == NULL) {
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        close(fd);
+        remove(fn);
+#endif
+        return PyErr_SetFromErrnoWithFilename(PyExc_IOError, fn);
+    }
+    data = PyObject_CallMethod(stream, "read", "");
+    if (data == NULL) {
+        fclose(fp);
+
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        remove(fn);
+#endif
+
+        return NULL;
+    }
+    if (!PyBytes_Check(data)) {
+        PyErr_Format(PyExc_TypeError,
+                     "f.read() returned %.100s instead of bytes",
+                     data->ob_type->tp_name);
+        Py_DECREF(data);
+        fclose(fp);
+
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        remove(fn);
+#endif
+
+        return NULL;
+    }
+    datalen = PyBytes_GET_SIZE(data);
+    if (fwrite(PyBytes_AS_STRING(data), 1, datalen, fp) != datalen) {
+        Py_DECREF(data);
+        fclose(fp);
+
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        remove(fn);
+#endif
+
+        return PyErr_SetFromErrnoWithFilename(PyExc_IOError, fn);
+    }
+    Py_DECREF(data);
+    fseek(fp, 0, 0);
+    win = getwin(fp);
+    fclose(fp);
+
+#ifdef _WIN32
+    _tremove(fn);
+#else
+    remove(fn);
+#endif
+
+    if (win == NULL) {
+        PyErr_SetString(PyCursesError, catchall_NULL);
+        return NULL;
+    }
+    return PyCursesWindow_New(win);
+}
+#else
 static PyObject *
 PyCurses_GetWin(PyCursesWindowObject *self, PyObject *temp)
 {
@@ -2046,6 +2153,7 @@ PyCurses_GetWin(PyCursesWindowObject *self, PyObject *temp)
 
     return PyCursesWindow_New(win);
 }
+#endif
 
 static PyObject *
 PyCurses_HalfDelay(PyObject *self, PyObject *args)
