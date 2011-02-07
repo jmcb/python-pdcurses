@@ -119,6 +119,13 @@ char *PyCursesVersion = "2.2";
 
 #define _ISPAD _PAD
 
+#if PY_MAJOR_VERSION == 3
+#ifdef _WIN32
+#include "windows.h"
+#include "tchar.h"
+#endif
+#endif
+
 #if !defined(HAVE_NCURSES_H) && (defined(sgi) || defined(__sun) || defined(SCO5))
 #define STRICT_SYSV_CURSES       /* Don't use ncurses extensions */
 typedef chtype attr_t;           /* No attr_t type is available */
@@ -1419,6 +1426,93 @@ PyCursesWindow_Overwrite(PyCursesWindowObject *self, PyObject *args)
     }
 }
 
+#if PY_MAJOR_VERSION == 3
+static PyObject *
+PyCursesWindow_PutWin(PyCursesWindowObject *self, PyObject *stream)
+{
+    /* We have to simulate this by writing to a temporary FILE*,
+       then reading back, then writing to the argument stream. */
+    PyObject *res;
+
+#ifdef _WIN32
+    TCHAR path[MAX_PATH];
+    DWORD retval;
+    retval = GetTempPath(MAX_PATH, path);
+    if (retval == 0 || retval > MAX_PATH)
+    {
+        PyErr_SetString(PyExc_IOError, "couldn't find the temporary file path");
+        return NULL;
+    }
+
+    TCHAR fn[MAX_PATH];
+    retval = GetTempFileName(path, TEXT("PY_curses"), 0, fn);
+    if (retval == 0)
+    {
+        PyErr_SetString(PyExc_IOError, "couldn't find temporary file name");
+        return NULL;
+    }
+
+    FILE *fp = _tfopen(fn, "wb+");
+#else
+    char fn[100];
+    int fd;
+    FILE *fp;
+
+    strcpy(fn, "/tmp/py.curses.putwin.XXXXXX");
+    fd = mkstemp(fn);
+
+    if (fd < 0)
+        return PyErr_SetFromErrnoWithFilename(PyExc_IOError, fn);
+
+    fp = fdopen(fd, "wb+");
+#endif
+
+    if (fp == NULL) {
+
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        close(fd);
+        remove(fn);
+#endif
+
+        return PyErr_SetFromErrnoWithFilename(PyExc_IOError, fn);
+    }
+    res = PyCursesCheckERR(putwin(self->win, fp), "putwin");
+    if (res == NULL) {
+        fclose(fp);
+
+#ifdef _WIN32
+        _tremove(fn);
+#else
+        remove(fn);
+#endif
+
+        return res;
+    }
+    fseek(fp, 0, 0);
+    while (1) {
+        char buf[BUFSIZ];
+        int n = fread(buf, 1, BUFSIZ, fp);
+        if (n <= 0)
+            break;
+        Py_DECREF(res);
+        res = PyObject_CallMethod(stream, "write", "y#", buf, n);
+        if (res == NULL)
+            break;
+    }
+
+    fclose(fp);
+
+#ifdef _WIN32
+    _tremove(fn);
+#else
+    remove(fn);
+#endif
+
+    return res;
+}
+#else
 static PyObject *
 PyCursesWindow_PutWin(PyCursesWindowObject *self, PyObject *args)
 {
@@ -1433,6 +1527,7 @@ PyCursesWindow_PutWin(PyCursesWindowObject *self, PyObject *args)
     return PyCursesCheckERR(putwin(self->win, PyFile_AsFile(temp)),
                             "putwin");
 }
+#endif
 
 static PyObject *
 PyCursesWindow_RedrawLine(PyCursesWindowObject *self, PyObject *args)
@@ -2156,7 +2251,7 @@ PyCurses_setupterm(PyObject* self, PyObject *args, PyObject* keywds)
 
         if (sys_stdout == NULL
 #if PY_MAJOR_VERSION == 3
-            || sys_stoud == Py_None
+            || sys_stdout == Py_None
 #endif
             )
         {
@@ -3012,7 +3107,11 @@ init_curses(void)
     /* Add some symbolic constants to the module */
     d = PyModule_GetDict(m);
     if (d == NULL)
+#if PY_MAJOR_VERSION == 3
+        return NULL;
+#else
         return;
+#endif
     ModDict = d; /* For PyCurses_InitScr to use later */
 
 #ifndef PyCurses_CAPSULE_NAME
