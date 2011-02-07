@@ -21,15 +21,15 @@ pdcurses
 
 On Windows, the following installers are available:
 
--. `pdcurses-0.3.4.win32-py2.7.exe`_
--. `pdcurses-0.3.4.win32-py2.6.exe`_
--. `pdcurses-0.3.4.win32-py2.5.exe`_
--. `pdcurses-0.3.4.win32-py2.4.exe`_
--. `pdcurses-0.3.4.win32-py2.3.exe`_
+- `pdcurses-0.3.4.win32-py2.7.exe`_
+- `pdcurses-0.3.4.win32-py2.6.exe`_
+- `pdcurses-0.3.4.win32-py2.5.exe`_
+- `pdcurses-0.3.4.win32-py2.4.exe`_
+- `pdcurses-0.3.4.win32-py2.3.exe`_
 
 You can also download the source:
 
--. `pdcurses-0.3.4.zip`_
+- `pdcurses-0.3.4.zip`_
 
 These contain everything required to use the ``curses`` module on
 Windows, including the ``pdcurses.dll`` file.
@@ -39,15 +39,15 @@ pdcurses-win32a
 
 On Windows, the following installers are available:
 
--. `pdcurses-win32a-0.3.4.win32-py2.7.exe`_
--. `pdcurses-win32a-0.3.4.win32-py2.6.exe`_
--. `pdcurses-win32a-0.3.4.win32-py2.5.exe`_
--. `pdcurses-win32a-0.3.4.win32-py2.4.exe`_
--. `pdcurses-win32a-0.3.4.win32-py2.3.exe`_
+- `pdcurses-win32a-0.3.4.win32-py2.7.exe`_
+- `pdcurses-win32a-0.3.4.win32-py2.6.exe`_
+- `pdcurses-win32a-0.3.4.win32-py2.5.exe`_
+- `pdcurses-win32a-0.3.4.win32-py2.4.exe`_
+- `pdcurses-win32a-0.3.4.win32-py2.3.exe`_
 
 You can also download the source:
 
--. `pdcurses-win32a-0.3.4.zip`_
+- `pdcurses-win32a-0.3.4.zip`_
 
 These contain everything required to use the ``curses`` module on
 Windows, including the ``pdcurses.dll (win32a fork)`` file.
