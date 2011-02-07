@@ -204,6 +204,28 @@ PyCursesCheckERR(int code, char *fname)
     }
 }
 
+#if PY_MAJOR_VERSION == 3
+static int
+PyCurses_ConvertToChtype(PyObject *obj, chtype *ch)
+{
+    if (PyLong_CheckExact(obj)) {
+        int overflow;
+        /* XXX should the truncation by the cast also be reported
+           as an error? */
+        *ch = (chtype) PyLong_AsLongAndOverflow(obj, &overflow);
+        if (overflow)
+            return 0;
+    } else if(PyBytes_Check(obj)
+              && (PyBytes_Size(obj) == 1)) {
+        *ch = (chtype) *PyBytes_AsString(obj);
+    } else if (PyUnicode_Check(obj) && PyUnicode_GetSize(obj) == 1) {
+        *ch = (chtype) *PyUnicode_AS_UNICODE(obj);
+    } else {
+        return 0;
+    }
+    return 1;
+}
+#else
 static int
 PyCurses_ConvertToChtype(PyObject *obj, chtype *ch)
 {
@@ -217,7 +239,7 @@ PyCurses_ConvertToChtype(PyObject *obj, chtype *ch)
     }
     return 1;
 }
-
+#endif
 /* Function versions of the 3 functions for testing whether curses has been
    initialised or not. */
 
@@ -837,14 +859,24 @@ PyCursesWindow_Enclose(PyCursesWindowObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args,"ii;y,x", &y, &x))
         return NULL;
 
-    return PyInt_FromLong( wenclose(self->win,y,x) );
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        (wenclose(self->win,y,x));
 }
 #endif
 
 static PyObject *
 PyCursesWindow_GetBkgd(PyCursesWindowObject *self)
 {
-    return PyInt_FromLong((long) getbkgd(self->win));
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ((long) getbkgd(self->win));
 }
 
 static PyObject *
@@ -870,7 +902,12 @@ PyCursesWindow_GetCh(PyCursesWindowObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "getch requires 0 or 2 arguments");
         return NULL;
     }
-    return PyInt_FromLong((long)rtn);
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ((long)rtn);
 }
 
 static PyObject *
@@ -901,7 +938,11 @@ PyCursesWindow_GetKey(PyCursesWindowObject *self, PyObject *args)
         PyErr_SetString(PyCursesError, "no input");
         return NULL;
     } else if (rtn<=255) {
+#if PY_MAJOR_VERSION == 3
+        return Py_BuildValue("C", rtn);
+#else
         return Py_BuildValue("c", rtn);
+#endif
     } else {
         const char *knp;
 #if defined(__NetBSD__)
@@ -909,7 +950,12 @@ PyCursesWindow_GetKey(PyCursesWindowObject *self, PyObject *args)
 #else
         knp = keyname(rtn);
 #endif
-        return PyString_FromString((knp == NULL) ? "" : knp);
+#if PY_MAJOR_VERSION == 3
+        return PyUnicode_FromString
+#else
+        return PyString_FromString
+#endif
+            ((knp == NULL) ? "" : knp);
     }
 }
 
@@ -964,7 +1010,12 @@ PyCursesWindow_GetStr(PyCursesWindowObject *self, PyObject *args)
     }
     if (rtn2 == ERR)
         rtn[0] = 0;
-    return PyString_FromString(rtn);
+#if PY_MAJOR_VERSION == 3
+    return PyBytes_FromString
+#else
+    return PyString_FromString
+#endif
+        (rtn);
 }
 
 static PyObject *
@@ -1081,7 +1132,12 @@ PyCursesWindow_InCh(PyCursesWindowObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "inch requires 0 or 2 arguments");
         return NULL;
     }
-    return PyInt_FromLong((long) rtn);
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ((long) rtn);
 }
 
 static PyObject *
@@ -1116,7 +1172,12 @@ PyCursesWindow_InStr(PyCursesWindowObject *self, PyObject *args)
     }
     if (rtn2 == ERR)
         rtn[0] = 0;
-    return PyString_FromString(rtn);
+#if PY_MAJOR_VERSION == 3
+    return PyBytes_FromString
+#else
+    return PyString_FromString
+#endif
+        (rtn);
 }
 
 static PyObject *
@@ -1639,11 +1700,13 @@ static PyMethodDef PyCursesWindow_Methods[] = {
     {NULL,                  NULL}   /* sentinel */
 };
 
+#if PY_MAJOR_VERSION < 3
 static PyObject *
 PyCursesWindow_GetAttr(PyCursesWindowObject *self, char *name)
 {
     return Py_FindMethod(PyCursesWindow_Methods, (PyObject *)self, name);
 }
+#endif
 
 /* -------------------------------------------------------*/
 
@@ -1655,14 +1718,34 @@ PyTypeObject PyCursesWindow_Type = {
     /* methods */
     (destructor)PyCursesWindow_Dealloc, /*tp_dealloc*/
     0,                          /*tp_print*/
+#if PY_MAJOR_VERSION == 3
+    (getattrfunc)0,             /*tp_getattr*/
+#else
     (getattrfunc)PyCursesWindow_GetAttr, /*tp_getattr*/
+#endif
     (setattrfunc)0, /*tp_setattr*/
-    0,                          /*tp_compare*/
+    0,                          /*tp_compare/tp_reserved*/
     0,                          /*tp_repr*/
     0,                          /*tp_as_number*/
     0,                          /*tp_as_sequence*/
     0,                          /*tp_as_mapping*/
     0,                          /*tp_hash*/
+#if PY_MAJOR_VERSION == 3
+    0,                          /*tp_call*/
+    0,                          /*tp_str*/
+    0,                          /*tp_getattro*/
+    0,                          /*tp_setattro*/
+    0,                          /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,         /*tp_flags*/
+    0,                          /*tp_doc*/
+    0,                          /*tp_traverse*/
+    0,                          /*tp_clear*/
+    0,                          /*tp_richcompare*/
+    0,                          /*tp_weaklistoffset*/
+    0,                          /*tp_iter*/
+    0,                          /*tp_iternext*/
+    PyCursesWindow_Methods,     /*tp_methods*/
+#endif
 };
 
 /*********************************************************************
@@ -1741,7 +1824,12 @@ PyCurses_color_pair(PyObject *self, PyObject *args)
     PyCursesInitialisedColor;
 
     if (!PyArg_ParseTuple(args, "i:color_pair", &n)) return NULL;
-    return PyInt_FromLong(COLOR_PAIR(n));
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        (COLOR_PAIR(n));
 }
 
 static PyObject *
@@ -1756,7 +1844,12 @@ PyCurses_Curs_Set(PyObject *self, PyObject *args)
     erg = curs_set(vis);
     if (erg == ERR) return PyCursesCheckERR(erg, "curs_set");
 
-    return PyInt_FromLong((long) erg);
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ((long) erg);
 }
 
 static PyObject *
@@ -1780,7 +1873,12 @@ PyCurses_EraseChar(PyObject *self)
 
     ch = erasechar();
 
-    return PyString_FromStringAndSize(&ch, 1);
+#if PY_MAJOR_VERSION == 3
+    return PyUnicode_FromStringAndSize
+#else
+    return PyString_FromStringAndSize
+#endif
+        (&ch, 1);
 }
 
 static PyObject *
@@ -1946,6 +2044,15 @@ PyCurses_InitScr(PyObject *self)
 
 /* This was moved from initcurses() because it core dumped on SGI,
    where they're not defined until you've called initscr() */
+#if PY_MAJOR_VERSION == 3
+#define SetDictInt(string,ch)                                           \
+    do {                                                                \
+        PyObject *o = PyLong_FromLong((long) (ch));                     \
+        if (o && PyDict_SetItemString(ModDict, string, o) == 0)     {   \
+            Py_DECREF(o);                                               \
+        }                                                               \
+    } while (0)
+#else
 #define SetDictInt(string,ch)                                           \
     do {                                                                \
         PyObject *o = PyInt_FromLong((long) (ch));                      \
@@ -1953,6 +2060,7 @@ PyCurses_InitScr(PyObject *self)
             Py_DECREF(o);                                               \
         }                                                               \
     } while (0)
+#endif
 
     /* Here are some graphic symbols you can use */
     SetDictInt("ACS_ULCORNER",      (ACS_ULCORNER));
@@ -2046,7 +2154,12 @@ PyCurses_setupterm(PyObject* self, PyObject *args, PyObject* keywds)
 
         sys_stdout = PySys_GetObject("stdout");
 
-        if (sys_stdout == NULL) {
+        if (sys_stdout == NULL
+#if PY_MAJOR_VERSION == 3
+            || sys_stoud == Py_None
+#endif
+            )
+        {
             PyErr_SetString(
                 PyCursesError,
                 "lost sys.stdout");
@@ -2142,7 +2255,12 @@ PyCurses_KeyName(PyObject *self, PyObject *args)
     }
     knp = keyname(ch);
 
-    return PyString_FromString((knp == NULL) ? "" : (char *)knp);
+#if PY_MAJOR_VERSION == 3
+    return PyUnicode_FromString
+#else
+    return PyString_FromString
+#endif
+        ((knp == NULL) ? "" : (char *)knp);
 }
 #endif
 
@@ -2153,7 +2271,12 @@ PyCurses_KillChar(PyObject *self)
 
     ch = killchar();
 
-    return PyString_FromStringAndSize(&ch, 1);
+#if PY_MAJOR_VERSION == 3
+    return PyUnicode_FromStringAndSize
+#else
+    return PyString_FromStringAndSize
+#endif
+        (&ch, 1);
 }
 
 static PyObject *
@@ -2308,8 +2431,12 @@ PyCurses_pair_number(PyObject *self, PyObject *args)
                         "pair_number requires 1 argument");
         return NULL;
     }
-
-    return PyInt_FromLong((long) ((n & A_COLOR) >> 8));
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ((long) ((n & A_COLOR) >> 8));
 }
 
 static PyObject *
@@ -2356,8 +2483,13 @@ update_lines_cols(void)
 
     if (!m)
         return 0;
+#if PY_MAJOR_VERSION == 3
+    o = PyLong_FromLong
+#else
+    o = PyInt_FromLong
+#endif
+        (LINES);
 
-    o = PyInt_FromLong(LINES);
     if (!o) {
         Py_DECREF(m);
         return 0;
@@ -2373,7 +2505,14 @@ update_lines_cols(void)
         return 0;
     }
     Py_DECREF(o);
-    o = PyInt_FromLong(COLS);
+
+#if PY_MAJOR_VERSION == 3
+    o = PyLong_FromLong
+#else
+    o = PyInt_FromLong
+#endif
+        (COLS);
+
     if (!o) {
         Py_DECREF(m);
         return 0;
@@ -2471,10 +2610,23 @@ PyCurses_Start_Color(PyObject *self)
     code = start_color();
     if (code != ERR) {
         initialisedcolors = TRUE;
-        c = PyInt_FromLong((long) COLORS);
+#if PY_MAJOR_VERSION == 3
+        c = PyLong_FromLong
+#else
+        c = PyInt_FromLong
+#endif
+            ((long) COLORS);
+
         PyDict_SetItemString(ModDict, "COLORS", c);
         Py_DECREF(c);
-        cp = PyInt_FromLong((long) COLOR_PAIRS);
+
+#if PY_MAJOR_VERSION == 3
+        cp = PyLong_FromLong
+#else
+        cp = PyInt_FromLong
+#endif
+            ((long) COLOR_PAIRS);
+
         PyDict_SetItemString(ModDict, "COLOR_PAIRS", cp);
         Py_DECREF(cp);
         Py_INCREF(Py_None);
@@ -2495,7 +2647,12 @@ PyCurses_tigetflag(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &capname))
         return NULL;
 
-    return PyInt_FromLong( (long) tigetflag( capname ) );
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ( (long) tigetflag( capname ) );
 }
 
 static PyObject *
@@ -2508,7 +2665,12 @@ PyCurses_tigetnum(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &capname))
         return NULL;
 
-    return PyInt_FromLong( (long) tigetnum( capname ) );
+#if PY_MAJOR_VERSION == 3
+    return PyLong_FromLong
+#else
+    return PyInt_FromLong
+#endif
+        ( (long) tigetnum( capname ) );
 }
 
 static PyObject *
@@ -2526,7 +2688,13 @@ PyCurses_tigetstr(PyObject *self, PyObject *args)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return PyString_FromString( capname );
+
+#if PY_MAJOR_VERSION == 3
+    return PyUnicode_FromString
+#else
+    return PyString_FromString
+#endif
+        ( capname );
 }
 
 static PyObject *
@@ -2550,7 +2718,12 @@ PyCurses_tparm(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    return PyString_FromString(result);
+#if PY_MAJOR_VERSION == 3
+    return PyUnicode_FromString
+#else
+    return PyString_FromString
+#endif
+        (result);
 }
 
 static PyObject *
@@ -2565,6 +2738,25 @@ PyCurses_TypeAhead(PyObject *self, PyObject *args)
     return PyCursesCheckERR(typeahead( fd ), "typeahead");
 }
 
+#if PY_MAJOR_VERSION == 3
+static PyObject *
+    PyCurses_UnCtrl(PyObject *self, PyObject *args)
+{
+    PyObject *temp;
+    chtype ch;
+
+    PyCursesInitialised
+
+        if (!PyArg_ParseTuple(args,"O;ch or int",&temp)) return NULL;
+
+    if (!PyCurses_ConvertToChtype(temp, &ch)) {
+        PyErr_SetString(PyExc_TypeError, "argument must be a ch or an int");
+        return NULL;
+    }
+
+    return PyBytes_FromString(unctrl(ch));
+}
+#else
 static PyObject *
 PyCurses_UnCtrl(PyObject *self, PyObject *args)
 {
@@ -2586,7 +2778,27 @@ PyCurses_UnCtrl(PyObject *self, PyObject *args)
 
     return PyString_FromString(unctrl(ch));
 }
+#endif
 
+#if PY_MAJOR_VERSION == 3
+static PyObject *
+    PyCurses_UngetCh(PyObject *self, PyObject *args)
+{
+    PyObject *temp;
+    chtype ch;
+
+    PyCursesInitialised
+
+        if (!PyArg_ParseTuple(args,"O;ch or int",&temp)) return NULL;
+
+    if (!PyCurses_ConvertToChtype(temp, &ch)) {
+        PyErr_SetString(PyExc_TypeError, "argument must be a ch or an int");
+        return NULL;
+    }
+
+    return PyCursesCheckERR(ungetch(ch), "ungetch");
+}
+#else
 static PyObject *
 PyCurses_UngetCh(PyObject *self, PyObject *args)
 {
@@ -2608,6 +2820,7 @@ PyCurses_UngetCh(PyObject *self, PyObject *args)
 
     return PyCursesCheckERR(ungetch(ch), "ungetch");
 }
+#endif
 
 static PyObject *
 PyCurses_Use_Env(PyObject *self, PyObject *args)
@@ -2745,14 +2958,37 @@ static PyMethodDef PyCurses_methods[] = {
 
 /* Initialization function for the module */
 
+#if PY_MAJOR_VERSION == 3
+static struct PyModuleDef _cursesmodule = {
+    PyModuleDef_HEAD_INIT,
+    "_curses",
+    NULL,
+    -1,
+    PyCurses_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+#endif
+
 PyMODINIT_FUNC
+#if PY_MAJOR_VERSION == 3
+PyInit__curses(void)
+#else
 init_curses(void)
+#endif
 {
     PyObject *m, *d, *v, *c_api_object;
     static void *PyCurses_API[PyCurses_API_pointers];
 
     /* Initialize object type */
+#if PY_MAJOR_VERSION == 3
+    if (PyType_Ready(&PyCursesWindow_Type) < 0)
+        return NULL;
+#else
     Py_TYPE(&PyCursesWindow_Type) = &PyType_Type;
+#endif
 
     /* Initialize the C API pointer array */
     PyCurses_API[0] = (void *)&PyCursesWindow_Type;
@@ -2761,9 +2997,17 @@ init_curses(void)
     PyCurses_API[3] = (void *)func_PyCursesInitialisedColor;
 
     /* Create the module and add the functions */
+#if PY_MAJOR_VERSION == 3
+    m = PyModule_Create(&_cursesmodule);
+#else
     m = Py_InitModule("_curses", PyCurses_methods);
+#endif
     if (m == NULL)
+#if PY_MAJOR_VERSION == 3
+        return NULL;
+#else
         return;
+#endif
 
     /* Add some symbolic constants to the module */
     d = PyModule_GetDict(m);
@@ -2788,7 +3032,13 @@ init_curses(void)
     PyDict_SetItemString(d, "error", PyCursesError);
 
     /* Make the version available */
-    v = PyString_FromString(PyCursesVersion);
+#if PY_MAJOR_VERSION == 3
+    v = PyUnicode_FromString
+#else
+    v = PyString_FromString
+#endif
+        (PyCursesVersion);
+
     PyDict_SetItemString(d, "version", v);
     PyDict_SetItemString(d, "__version__", v);
     Py_DECREF(v);
@@ -2913,4 +3163,8 @@ init_curses(void)
         SetDictInt("KEY_MIN", KEY_MIN);
         SetDictInt("KEY_MAX", KEY_MAX);
     }
+
+#if PY_MAJOR_VERSION == 3
+    return m;
+#endif
 }

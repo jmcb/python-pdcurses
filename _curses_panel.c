@@ -14,7 +14,7 @@ static char *PyCursesVersion = "2.1";
 
 #include "py_curses.h"
 
-#include <panel.h>
+#include "panel.h"
 
 static PyObject *PyCursesError;
 
@@ -342,11 +342,13 @@ static PyMethodDef PyCursesPanel_Methods[] = {
     {NULL,              NULL}   /* sentinel */
 };
 
+#if PY_MAJOR_VERSION < 3
 static PyObject *
 PyCursesPanel_GetAttr(PyCursesPanelObject *self, char *name)
 {
     return Py_FindMethod(PyCursesPanel_Methods, (PyObject *)self, name);
 }
+#endif
 
 /* -------------------------------------------------------*/
 
@@ -358,14 +360,35 @@ PyTypeObject PyCursesPanel_Type = {
     /* methods */
     (destructor)PyCursesPanel_Dealloc, /*tp_dealloc*/
     0,                  /*tp_print*/
+#if PY_MAJOR_VERSION == 3
+    0,                  /*tp_getattr*/
+    0,                  /*tp_setattr*/
+#else
     (getattrfunc)PyCursesPanel_GetAttr, /*tp_getattr*/
     (setattrfunc)0, /*tp_setattr*/
-    0,                  /*tp_compare*/
+#endif
+    0,                  /*tp_compare/tp_reserved*/
     0,                  /*tp_repr*/
     0,                  /*tp_as_number*/
     0,                  /*tp_as_sequence*/
     0,                  /*tp_as_mapping*/
     0,                  /*tp_hash*/
+#if PY_MAJOR_VERSION == 3
+    0,                  /*tp_call*/
+    0,                  /*tp_str*/
+    0,                  /*tp_getattro*/
+    0,                  /*tp_setattro*/
+    0,                  /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT, /*tp_flags*/
+    0,                  /*tp_doc*/
+    0,                  /*tp_traverse*/
+    0,                  /*tp_clear*/
+    0,                  /*tp_richcompare*/
+    0,                  /*tp_weaklistoffset*/
+    0,                  /*tp_iter*/
+    0,                  /*tp_iternext*/
+    PyCursesPanel_Methods, /*tp_methods*/
+#endif
 };
 
 /* Wrapper for panel_above(NULL). This function returns the bottom
@@ -462,22 +485,54 @@ static PyMethodDef PyCurses_methods[] = {
     {NULL,              NULL}           /* sentinel */
 };
 
+#if PY_MAJOR_VERSION == 3
+static struct PyModuleDef _curses_panelmodule = {
+        PyModuleDef_HEAD_INIT,
+        "_curses_panel",
+        NULL,
+        -1,
+        PyCurses_methods,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+};
+#endif
+
 /* Initialization function for the module */
 
 PyMODINIT_FUNC
+#if PY_MAJOR_VERSION == 3
+PyInit__curses_panel(void)
+#else
 init_curses_panel(void)
+#endif
 {
     PyObject *m, *d, *v;
 
     /* Initialize object type */
+#if PY_MAJOR_VERSION == 3
+    if (PyType_Ready(&PyCursesPanel_Type) < 0)
+        return NULL;
+#else
     Py_TYPE(&PyCursesPanel_Type) = &PyType_Type;
+#endif
 
     import_curses();
 
     /* Create the module and add the functions */
+#if PY_MAJOR_VERSION == 3
+    m = PyModule_Create(&_curses_panelmodule);
+#else
     m = Py_InitModule("_curses_panel", PyCurses_methods);
+#endif
+
     if (m == NULL)
+#if PY_MAJOR_VERSION == 3
+        return NULL;
+#else
         return;
+#endif
     d = PyModule_GetDict(m);
 
     /* For exception _curses_panel.error */
@@ -485,8 +540,18 @@ init_curses_panel(void)
     PyDict_SetItemString(d, "error", PyCursesError);
 
     /* Make the version available */
-    v = PyString_FromString(PyCursesVersion);
+#if PY_MAJOR_VERSION == 3
+    v = PyUnicode_FromString
+#else
+    v = PyString_FromString
+#endif
+        (PyCursesVersion);
+
     PyDict_SetItemString(d, "version", v);
     PyDict_SetItemString(d, "__version__", v);
     Py_DECREF(v);
+
+#if PY_MAJOR_VERSION == 3
+    return m;
+#endif
 }
